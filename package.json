@@ -1,0 +1,25 @@
+{
+  "name": "employee-cms",
+  "version": "1.0.0",
+  "description": "command line app to track employees",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodyBonsma/Employee-CMS.git"
+  },
+  "author": "Cody Bonsma",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CodyBonsma/Employee-CMS/issues"
+  },
+  "homepage": "https://github.com/CodyBonsma/Employee-CMS#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}
