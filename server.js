@@ -87,9 +87,9 @@ function viewEmployeesByDept() {
   console.log("view all employees by department");
   console.log("=====================================");
   connection.query(
-    `SELECT employee.first_name, employee.last_name, comp_role.title, department.name, comp_role.salary FROM comp_role
-  INNER JOIN employee ON employee.role_id = comp_role.id
-  INNER JOIN department ON comp_role.department_id = department.id`,
+    `SELECT employee.first_name, employee.last_name, comp_role.title, department.name, comp_role.salary FROM employee
+  JOIN comp_role ON employee.role_id = comp_role.id
+  JOIN department ON comp_role.department_id = department.id`,
     (err, data) => {
       if (err) throw err;
       console.table(data);
@@ -183,14 +183,20 @@ function addEmployee() {
         message: "Please enter employee's last name",
       },
       {
-        type: "number",
+        type: "list",
         name: "employeeId",
-        message: "Please enter employee's ID",
+        message: "Please enter employee's role",
+        choices: [
+          { name: "Software Engineer", value: 1 },
+          { name: "Salesperson", value: 2 },
+          { name: "Accountant", value: 3 },
+          { name: "Lawyer", value: 4 },
+        ],
       },
       {
         type: "list",
         name: "employeeManager",
-        message: "Please select the employee's Manager",
+        message: "Please select the employee's Manager number",
         choices: [1, 2, 3],
       },
     ])
