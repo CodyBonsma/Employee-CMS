@@ -12,10 +12,12 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
+  console.log("Welcome to your Employee Content Management System");
   init();
 });
 
 function init() {
+  console.log("=====================================");
   inquirer
     .prompt([
       {
@@ -25,35 +27,26 @@ function init() {
         choices: [
           "View All Employees",
           "View All Employees By Department",
-          "View All Employees By Manager",
+          "View Roles",
+          "View Departments",
           "Add Employee",
           "Add Department",
           "Add Role",
-          "View Roles",
-          "View Departments",
-          "Remove Employee",
-          "Update Employee Manager",
         ],
       },
     ])
     .then(function (response) {
-      console.log(response);
+      // console.log(response);
       if (response.whatDoYouWant === "View All Employees") {
         viewAllEmployees();
       } else if (
         response.whatDoYouWant === "View All Employees By Department"
       ) {
         viewEmployeesByDept();
-      } else if (response.whatDoYouWant === "View All Employees By Manager") {
-        viewEmployeesByManager();
       } else if (response.whatDoYouWant === "Add Employee") {
         addEmployee();
-      } else if (response.whatDoYouWant === "Remove Employee") {
-        removeEmployee();
       } else if (response.whatDoYouWant === "View Departments") {
         viewDepartment();
-      } else if (response.whatDoYouWant === "Update Employee Manager") {
-        updateEmployeeManager();
       } else if (response.whatDoYouWant === "Add Department") {
         addDept();
       } else if (response.whatDoYouWant === "View Roles") {
@@ -70,19 +63,18 @@ function init() {
 // related functions from the init prompt
 //=======================================
 
-const currentEmployees = [];
-
 // function for viewing all employees
 function viewAllEmployees() {
   console.log("view all employees");
+  console.log("=====================================");
   connection.query("SELECT * FROM employee", (err, data) => {
     if (err) throw err;
     console.table(data);
-    currentEmployees.push(data);
+    init();
   });
 }
 
-function viewRoles(){
+function viewRoles() {
   connection.query("SELECT * FROM comp_role", (err, data) => {
     if (err) throw err;
     console.table(data);
@@ -93,6 +85,7 @@ function viewRoles(){
 // function for viewing all employees by department
 function viewEmployeesByDept() {
   console.log("view all employees by department");
+  console.log("=====================================");
   connection.query(
     `SELECT employee.first_name, employee.last_name, comp_role.title, department.name, comp_role.salary FROM comp_role
   INNER JOIN employee ON employee.role_id = comp_role.id
@@ -100,42 +93,83 @@ function viewEmployeesByDept() {
     (err, data) => {
       if (err) throw err;
       console.table(data);
+      init();
     }
   );
 }
 
-function viewDepartment(){
+function viewDepartment() {
+  console.log("=====================================");
   connection.query("SELECT * FROM department", (err, data) => {
     if (err) throw err;
     console.table(data);
     init();
   });
 }
-// function for viewing all employees by Manager
-// function viewEmployeesByManager() {
-//   console.log("view all employees by Manager");
-// }
 
-function addDept(){
-console.log("Ready to add a department");
-inquirer.prompt([
-  {
-    type: "input",
-    name: "addDepartment",
-    message: "What department would you like to add?"
-  }
-]).then(function(result){
-  connection.query(`INSERT INTO department (name) VALUES (?)`, [result.addDepartment], (err,data) =>{
-    if(err) throw err;
-    console.table(data);
-    init();
-  })
-})
+function addRole() {
+  console.log("Ready to add a role");
+  console.log("=====================================");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "addRole",
+        message: "What role would you like to add?",
+      },
+      {
+        type: "input",
+        name: "addSalary",
+        message: "What is the salary for this role?",
+      },
+      {
+        type: "list",
+        name: "departmentId",
+        message: "Please select the related department ID",
+        choices: [1, 2, 3, 4],
+      },
+    ])
+    .then(function (result) {
+      connection.query(
+        `INSERT INTO comp_role (title, salary, department_id) VALUES (?)`,
+        [[result.addRole, result.addSalary, result.departmentId]],
+        (err, data) => {
+          if (err) throw err;
+          console.table(data);
+          init();
+        }
+      );
+    });
+}
+
+function addDept() {
+  console.log("Ready to add a department");
+  console.log("=====================================");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "addDepartment",
+        message: "What department would you like to add?",
+      },
+    ])
+    .then(function (result) {
+      connection.query(
+        `INSERT INTO department (name) VALUES (?)`,
+        [result.addDepartment],
+        (err, data) => {
+          if (err) throw err;
+          console.table(data);
+          init();
+        }
+      );
+    });
 }
 
 // function for adding employees
 function addEmployee() {
   console.log("Add employee function");
+  console.log("=====================================");
   inquirer
     .prompt([
       {
@@ -173,8 +207,6 @@ function addEmployee() {
         ],
         (err, data) => {
           if (err) throw err;
-          // console.log(data);
-          console.table(data);
           init();
         }
       );
@@ -187,27 +219,36 @@ function addEmployee() {
 // function for removing employees
 function removeEmployee() {
   console.log("Remove an employee");
-  inquirer.prompt([
-    {
-      type: "list",
-      name: "deleteEmployee",
-      message: "Which employee would you like to delete",
-      choices: currentView
-    }
-  ]).then(function(result){
-    connection.query(`DELETE FROM employee WHERE first_name = ?`, [currentEmployees], function(err, data){
-      if (err) throw err;
-      console.log(data);
-      init();
+  console.log("=====================================");
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "deleteEmployee",
+        message: "Which employee would you like to delete",
+        choices: currentView,
+      },
+    ])
+    .then(function (result) {
+      connection.query(
+        `DELETE FROM employee WHERE first_name = ?`,
+        [currentEmployees],
+        function (err, data) {
+          if (err) throw err;
+          console.log(data);
+          init();
+        }
+      );
     })
-  }).catch((err) => {
-    if (err) throw err;
-  })
+    .catch((err) => {
+      if (err) throw err;
+    });
 }
 
 // function for updating employee
 function updateEmployee() {
   console.log("Update Employee");
+  console.log("================================");
 }
 
 // update employee manager
@@ -217,19 +258,3 @@ function updateEmployeeManager() {
 // connect with all the required packages
 
 // create the schema database with the three tables (dept, role and employee)
-
-// setup connection with the server
-
-// with inquirer, let users create (dept, role and employee)
-// these changes should then update the database
-// ==================================
-// ===== What would you like to do?
-//View all employees
-//View all employees by Dept
-//View all employees by Manager
-//Add employee
-//Remove employee
-//Update employee role
-//Update employee manager
-
-// create functionality
